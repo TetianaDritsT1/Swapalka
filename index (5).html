@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Base DEX Swap</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 24px; border-radius: 16px; width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h2 { margin-top: 0; text-align: center; color: #38bdf8; }
+        .input-group { margin-bottom: 16px; background: #0f172a; padding: 12px; border-radius: 10px; }
+        label { font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px; }
+        select, input { width: 100%; background: transparent; border: none; color: #fff; font-size: 16px; outline: none; margin-top: 4px; }
+        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #2563eb; }
+        #connectWallet { background: #334155; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Base DEX</h2>
+    <button id="connectWallet" onclick="connectWallet()">Подключить кошелек</button>
+    
+    <div class="input-group">
+        <label>Продаете</label>
+        <input type="number" id="amountIn" placeholder="0.0">
+        <select id="tokenIn">
+            <option value="ETH">ETH</option>
+            <option value="USDC">USDC</option>
+            <option value="USDbC">USDbC</option>
+            <option value="DAI">DAI</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Покупаете (приблизительно)</label>
+        <input type="number" id="amountOut" placeholder="0.0" disabled>
+        <select id="tokenOut">
+            <option value="USDC">USDC</option>
+            <option value="ETH">ETH</option>
+            <option value="USDbC">USDbC</option>
+            <option value="DAI">DAI</option>
+        </select>
+    </div>
+
+    <button onclick="executeSwap()">Свапнуть</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+    // Твой адрес смарт-контракта в сети Base
+    const CONTRACT_ADDRESS = "0x002B4e7c39865d03E27D618A2AF2Bd8C54EDd549";
+
+    let provider, signer, userAddress;
+
+    async function connectWallet() {
+        if (window.ethereum) {
+            try {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                document.getElementById("connectWallet").innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
+            } catch (error) {
+                console.error("Ошибка подключения:", error);
+            }
+        } else {
+            alert("Установите MetaMask или Coinbase Wallet!");
+        }
+    }
+
+    async function executeSwap() {
+        if (!signer) {
+            alert("Сначала подключите кошелек!");
+            return;
+        }
+        const amountIn = document.getElementById("amountIn").value;
+        const tokenIn = document.getElementById("tokenIn").value;
+        const tokenOut = document.getElementById("tokenOut").value;
+
+        if (!amountIn || amountIn <= 0) {
+            alert("Введите корректную сумму!");
+            return;
+        }
+
+        console.log(`Вызов контракта ${CONTRACT_ADDRESS} для свапа ${amountIn} ${tokenIn} на ${tokenOut}`);
+        alert(`Свап запущен через контракт: ${CONTRACT_ADDRESS}`);
+    }
+</script>
+
+</body>
+</html>

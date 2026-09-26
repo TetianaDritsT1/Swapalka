@@ -3,265 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwapNorm — DEX на Base</title>
+    <title>SwapNorm DEX</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
         body {
-            background-color: #0b0f19;
-            color: #f1f5f9;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            margin: 0;
         }
-        .dex-container {
+        .card {
             background-color: #1e293b;
-            border-radius: 20px;
-            padding: 24px;
-            width: 420px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            width: 380px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
-        .dex-header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        .dex-title {
-            font-size: 22px;
-            font-weight: 700;
+        .title {
+            font-size: 20px;
+            font-weight: bold;
             color: #38bdf8;
         }
-        .connect-btn {
-            background-color: #3b82f6;
+        .wallet-btn {
+            background-color: #0284c7;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s;
+            font-size: 12px;
+            font-weight: 600;
         }
-        .connect-btn:hover {
-            background-color: #2563eb;
-        }
-        .swap-box {
+        .wallet-btn:hover { background-color: #0369a1; }
+        .box {
             background-color: #0f172a;
-            border-radius: 14px;
-            padding: 16px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 12px 16px;
             margin-bottom: 12px;
-            border: 1px solid #1e293b;
         }
-        .swap-box label {
-            font-size: 13px;
+        .label {
+            font-size: 12px;
             color: #94a3b8;
-            display: block;
             margin-bottom: 6px;
         }
-        .input-row {
+        .row {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .swap-input {
+        input, select {
             background: transparent;
             border: none;
-            color: #ffffff;
-            font-size: 24px;
-            width: 60%;
-            outline: none;
-        }
-        .token-select {
-            background-color: #334155;
             color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            outline: none;
-        }
-        .action-btn {
-            width: 100%;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 14px;
             font-size: 18px;
+            outline: none;
+        }
+        input { width: 60%; }
+        select {
+            background-color: #334155;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .swap-btn {
+            width: 100%;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 10px;
+            margin-top: 8px;
         }
-        .action-btn:hover {
-            background-color: #2563eb;
-        }
-        .status-log {
-            margin-top: 15px;
+        .swap-btn:hover { background-color: #0369a1; }
+        .status {
+            margin-top: 12px;
             font-size: 13px;
-            color: #cbd5e1;
-            background: #0f172a;
-            padding: 10px;
-            border-radius: 8px;
-            word-break: break-all;
-            max-height: 100px;
-            overflow-y: auto;
+            color: #f43f5e;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-<div class="dex-container">
-    <div class="dex-header">
-        <div class="dex-title">SwapNorm</div>
-        <button id="connectWalletBtn" class="connect-btn" onclick="connectWallet()">Подключить</button>
-    </div>
-
-    <div class="swap-box">
-        <label>Продаете</label>
-        <div class="input-row">
-            <input type="number" id="amountIn" class="swap-input" placeholder="0.0">
-            <select id="tokenIn" class="token-select">
-                <option value="ETH">ETH</option>
-                <option value="USDC">USDC</option>
-                <option value="USDbC">USDbC</option>
-                <option value="DAI">DAI</option>
-            </select>
+    <div class="card">
+        <div class="header">
+            <div class="title">SwapNorm</div>
+            <button class="wallet-btn" id="connectBtn" onclick="connectWallet()">Подключить</button>
         </div>
-    </div>
 
-    <div class="swap-box">
-        <label>Получаете (приблизительно)</label>
-        <div class="input-row">
-            <input type="number" id="amountOut" class="swap-input" placeholder="0.0" disabled>
-            <select id="tokenOut" class="token-select">
-                <option value="USDC">USDC</option>
-                <option value="ETH">ETH</option>
-                <option value="USDbC">USDbC</option>
-                <option value="DAI">DAI</option>
-            </select>
+        <div class="box">
+            <div class="label">Продаете</div>
+            <div class="row">
+                <input type="number" id="amountIn" placeholder="0.0" value="1">
+                <select id="tokenIn" onchange="updateTokens()">
+                    <option value="DAI">DAI</option>
+                    <option value="USDC">USDC</option>
+                    <option value="USDbC">USDbC</option>
+                    <option value="ETH">ETH</option>
+                </select>
+            </div>
         </div>
+
+        <div class="box">
+            <div class="label">Получаете (приблизительно)</div>
+            <div class="row">
+                <input type="text" id="amountOut" placeholder="0.0" readonly>
+                <select id="tokenOut" onchange="updateTokens()">
+                    <option value="USDC">USDC</option>
+                    <option value="DAI">DAI</option>
+                    <option value="USDbC">USDbC</option>
+                    <option value="ETH">ETH</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="swap-btn" onclick="executeSwap()">Выполнить обмен</button>
+        <div class="status" id="statusMsg"></div>
     </div>
 
-    <button class="action-btn" onclick="executeRealSwap()">Выполнить обмен</button>
+    <script>
+        // Вставь сюда полный адрес твоего развернутого контракта в нижнем регистре
+        const CONTRACT_ADDRESS = "0x7E797E373a141864fDF9c3C5509d3EC45B5A63E3".toLowerCase();
 
-    <div id="statusLog" class="status-log" style="display:none;">Лог транзакции появится здесь...</div>
-</div>
+        const TOKEN_ADDRESSES = {
+            "ETH": "0x4200000000000000000000000000000000000006".toLowerCase(),
+            "USDC": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913".toLowerCase(),
+            "USDbC": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca".toLowerCase(),
+            "DAI": "0x50c5725949a6f0c72e6c4a641f24049a917db0cb".toLowerCase()
+        };
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script>
-    const CONTRACT_ADDRESS = "0x7E797E373a141864fDF9c3C5509d3EC45B5A63E3";
-    
-    const TOKEN_ADDRESSES = {
-        "ETH": "0x4200000000000000000000000000000000000006".toLowerCase(),
-        "USDC": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913".toLowerCase(),
-        "USDbC": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca".toLowerCase(),
-        "DAI": "0x50c5725949a6f0c72e6c4a641f24049a917db0cb".toLowerCase()
-    };
+        const TOKEN_DECIMALS = {
+            "ETH": 18,
+            "USDC": 6,
+            "USDbC": 6,
+            "DAI": 18
+        };
 
-    const CONTRACT_ABI = [
-        "function executeSwap(address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOutMin, bool isEthIn) external payable"
-    ];
+        const ERC20_ABI = [
+            "function approve(address spender, uint256 amount) external returns (bool)",
+            "function allowance(address owner, address spender) external view returns (uint256)"
+        ];
 
-    let provider, signer, userAddress;
+        const DEX_ABI = [
+            "function executeSwap(address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOutMin, bool isEthIn) external payable"
+        ];
 
-    async function connectWallet() {
-        if (window.ethereum) {
+        let provider, signer, userAddress;
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = await provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    document.getElementById("connectBtn").innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
+                    document.getElementById("statusMsg").innerText = "";
+                } catch (err) {
+                    document.getElementById("statusMsg").innerText = "Ошибка подключения кошелька";
+                }
+            } else {
+                alert("Установите MetaMask!");
+            }
+        }
+
+        function updateTokens() {
+            let tIn = document.getElementById("tokenIn").value;
+            let tOut = document.getElementById("tokenOut").value;
+            if (tIn === tOut) {
+                document.getElementById("statusMsg").innerText = "Нельзя менять одинаковые токены!";
+            } else {
+                document.getElementById("statusMsg").innerText = "";
+            }
+        }
+
+        async function executeSwap() {
             try {
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                
-                const network = await provider.getNetwork();
-                if (network.chainId !== 8453) {
-                    alert("Пожалуйста, переключите сеть в MetaMask на Base!");
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x2105' }],
-                        });
-                    } catch (switchError) {
-                        return;
+                if (!signer) {
+                    await connectWallet();
+                    if (!signer) return;
+                }
+
+                let tInKey = document.getElementById("tokenIn").value;
+                let tOutKey = document.getElementById("tokenOut").value;
+                let amountVal = document.getElementById("amountIn").value;
+
+                if (!amountVal || parseFloat(amountVal) <= 0) {
+                    document.getElementById("statusMsg").innerText = "Введите корректную сумму";
+                    return;
+                }
+
+                if (tInKey === tOutKey) {
+                    document.getElementById("statusMsg").innerText = "Выберите разные токены";
+                    return;
+                }
+
+                let tokenInAddr = TOKEN_ADDRESSES[tInKey];
+                let tokenOutAddr = TOKEN_ADDRESSES[tOutKey];
+                let decimals = TOKEN_DECIMALS[tInKey];
+                let amountInWei = ethers.parseUnits(amountVal, decimals);
+                let isEthIn = (tInKey === "ETH");
+
+                document.getElementById("statusMsg").style.color = "#38bdf8";
+                let dexContract = new ethers.Contract(CONTRACT_ADDRESS, DEX_ABI, signer);
+                if (!isEthIn) {
+                    document.getElementById("statusMsg").innerText = "Шаг 1/2: Подтверждение токенов (Approve)...";
+                    let tokenContract = new ethers.Contract(tokenInAddr, ERC20_ABI, signer);
+                    
+                    let allowance = await tokenContract.allowance(userAddress, CONTRACT_ADDRESS);
+                    if (allowance < amountInWei) {
+                        let approveTx = await tokenContract.approve(CONTRACT_ADDRESS, amountInWei);
+                        await approveTx.wait();
                     }
                 }
 
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
+                document.getElementById("statusMsg").innerText = "Шаг 2/2: Выполнение обмена...";
+                let valueToSend = isEthIn ? amountInWei : 0;
                 
-                const btn = document.getElementById("connectWalletBtn");
-                btn.innerText = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
-                logStatus("Кошелек успешно подключен!");
-            } catch (error) {
-                console.error(error);
-                alert("Ошибка подключения кошелька.");
+                let tx = await dexContract.executeSwap(
+                    tokenInAddr,
+                    tokenOutAddr,
+                    amountInWei,
+                    0,
+                    isEthIn,
+                    { value: valueToSend }
+                );
+
+                await tx.wait();
+                document.getElementById("statusMsg").style.color = "#22c55e";
+                document.getElementById("statusMsg").innerText = "Успешный обмен! 🎉";
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById("statusMsg").style.color = "#f43f5e";
+                document.getElementById("statusMsg").innerText = "Ошибка: " + (err.reason || err.message || "транзакция отклонена");
             }
-        } else {
-            alert("Установите MetaMask или Coinbase Wallet!");
         }
-    }
-
-    async function executeRealSwap() {
-        if (!signer) {
-            alert("Сначала подключите кошелек!");
-            return;
-        }
-
-        const amountInVal = document.getElementById("amountIn").value;
-        const tokenInKey = document.getElementById("tokenIn").value;
-        const tokenOutKey = document.getElementById("tokenOut").value;
-
-        if (!amountInVal || amountInVal <= 0) {
-            alert("Введите корректную сумму для обмена!");
-            return;
-        }
-
-        if (tokenInKey === tokenOutKey) {
-            alert("Нельзя обменивать одинаковые токены!");
-            return;
-        }
-
-        try {
-            logStatus("Подготовка транзакции...");
-            const parsedAmountIn = ethers.utils.parseUnits(amountInVal, 18);
-            const tokenInAddr = TOKEN_ADDRESSES[tokenInKey];
-            const tokenOutAddr = TOKEN_ADDRESSES[tokenOutKey];
-            const isEth = (tokenInKey === "ETH");
-
-            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-            logStatus("Подтвердите транзакцию в вашем кошельке...");
-            
-            const tx = await contract.executeSwap(
-                tokenInAddr,
-                tokenOutAddr,
-                parsedAmountIn,
-                0, 
-                isEth,
-                { value: isEth ? parsedAmountIn : 0 }
-            );
-
-            logStatus(`Транзакция отправлена! Хеш: ${tx.hash}`);
-            await tx.wait();
-            logStatus("Обмен успешно выполнен в сети Base! 🎉");
-
-        } catch (err) {
-            console.error(err);
-            logStatus("Ошибка: " + (err.reason || err.message));
-        }
-    }
-
-    function logStatus(text) {
-        const logBox = document.getElementById("statusLog");
-        logBox.style.display = "block";
-        logBox.innerText = text;
-    }
-</script>
-
+    </script>
 </body>
 </html>
